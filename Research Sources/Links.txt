@@ -10,3 +10,8 @@ Wireless Protocol design for smart home :
 
 Implementation of Smart-Home Monitoring System :
 	https://link.springer.com/chapter/10.1007/978-81-322-2580-5_43
+
+small object detection:
+1) https://www.sciencedirect.com/science/article/abs/pii/S0262885620300421
+
+2) https://www.sciencedirect.com/science/article/abs/pii/S0957417421000439
