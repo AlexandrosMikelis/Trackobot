@@ -17,7 +17,7 @@ while True:
         pts2 = barcode.rect
 
         cv2.putText(img,myData,(pts2[0],pts2[1]),cv2.FONT_HERSHEY_COMPLEX,0.9,(255,0,255),2)
-
+        print(barcode.rect,barcode.polygon)
     cv2.imshow('Result', img)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
