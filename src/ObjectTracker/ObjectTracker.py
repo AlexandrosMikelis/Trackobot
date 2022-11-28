@@ -35,7 +35,7 @@ if __name__ == '__main__' :
     #video = cv2.VideoCapture("input.mp4")
     video = cv2.VideoCapture(1) # for using CAM
  
-    # Exit if video not opened.
+    # Exit if video not opened.c
     if not video.isOpened():
         print("Could not open video")
         sys.exit()
@@ -58,10 +58,12 @@ if __name__ == '__main__' :
     while True:
         # Read a new frame
         ok, frame = video.read()
+
         if not ok:
             break
          
         # Start timer
+
         timer = cv2.getTickCount()
  
         # Update tracker
