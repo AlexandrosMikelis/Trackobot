@@ -43,7 +43,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'api',
+    'workspaces',
     'products',
+    
 ]
 
 MIDDLEWARE = [
@@ -84,7 +86,7 @@ WSGI_APPLICATION = 'cfehome.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
+        'NAME': 'trackobotDB',
         'USER': 'postgres',
         'PASSWORD': 'admin1234',
         'HOST': '127.0.0.1', 

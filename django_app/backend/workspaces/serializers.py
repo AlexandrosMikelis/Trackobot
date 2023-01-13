@@ -3,10 +3,10 @@ from rest_framework.reverse import reverse
 
 
 
-from .models import Product
+from .models import Workspace
 # from . import validators
 
-class ProductSerializer(serializers.ModelSerializer):
+class WorkspaceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Product
+        model = Workspace
         fields = '__all__'
