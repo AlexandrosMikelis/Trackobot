@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from pyzbar.pyzbar import decode
 
-cap = cv2.VideoCapture('rtsp://tapoadmin:iotproject@192.168.1.8:554/stream1')
+cap = cv2.VideoCapture(3)
 cap.set(3,640)
 cap.set(4,480)
 
