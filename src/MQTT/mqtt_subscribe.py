@@ -7,7 +7,7 @@ def on_message(cient,userdata,message):
     m_in = json.loads(m_decode)
     print("Received message: ", str(m_in))
 
-mqttBroker = "mqtt.eclipseprojects.io"
+mqttBroker = "192.168.1.4"
 client = mqtt.Client("PC")
 client.connect(mqttBroker)
 

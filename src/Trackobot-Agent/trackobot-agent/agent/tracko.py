@@ -2,6 +2,10 @@ import cv2
 import numpy as np
 from pyzbar.pyzbar import decode
 from datetime import datetime
+import paho.mqtt.client as mqtt
+import time 
+import json
+
 
 # conf = {
 #     "source":0
@@ -27,6 +31,8 @@ class Trackobot:
         
     def getFrame(self):
         _ , frame = self.capture.read()
+        # frame = cv2.cvtColor(np.float32(frame), cv2.COLOR_BGR2GRAY)
+        # frame = cv2.dft(np.float32(frame), flags=cv2.DFT_COMPLEX_OUTPUT)
         return frame
     
     def barcodeDetection(self,img,feedback=False):
@@ -75,7 +81,7 @@ class Trackobot:
             # Tracking success
             p1 = (int(self.bbox[0]), int(self.bbox[1]))
             p2 = (int(self.bbox[0] + self.bbox[2]), int(self.bbox[1] + self.bbox[3]))
-            print(p1,p2)
+            
             if p2[0] < self.conf["seperating_line"]["start_point"][0] and self.ins < self.all: 
                 self.ins += 1
                 self.outs = self.all - self.ins
@@ -93,8 +99,11 @@ class Trackobot:
 
 if __name__ == "__main__" :
     
+    mqttBroker = "192.168.1.4"
+    client = mqtt.Client("Pi")
+    client.connect(mqttBroker, port=1883)
     configuration = {
-        "source":'http://192.168.1.9:4747/video',
+        "source":'http://192.168.1.3:4747/video',
         "seperating_line" : {
             "start_point" : (250,0),
             "end_point" : (250,500),
@@ -117,19 +126,23 @@ if __name__ == "__main__" :
     initial_stage = True
     flag = False
     Objects = []
+    testing ={"Object0":{}}
     
     Medicinetracker = Trackobot(configuration)
     # result = cv2.VideoWriter('filename.mp4', 
     #                      cv2.VideoWriter_fourcc(*'mp4v'),
     #                      10, (500,500))
     # Medicinetracker.connect()
+    iter = 0
     while True:
         frame = Medicinetracker.getFrame()
         cv2.line(frame, start_point, end_point, color, thickness)
         if not success4barcode:
             success4barcode,tracked_barcodeObject = Medicinetracker.barcodeDetection(frame)
+            
             if tracked_barcodeObject:
                 Objects.append(tracked_barcodeObject)
+                testing["Object" + str(iter)]["barcode"] = tracked_barcodeObject["Barcode"]
                 Medicinetracker.init_tracker(Objects[0]["Rect"])
                 
         if success4barcode:
@@ -139,17 +152,21 @@ if __name__ == "__main__" :
             if success:
                 Medicinetracker.init_tracker(trackedObject["Rect"])
             ok, bbox = Medicinetracker.trackBarcode(frame)
-    
+            
             # Display tracker type on frame
             cv2.putText(frame, Medicinetracker.tracker_type + " Tracker", (100,20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50,170,50),2)
             
         cv2.imshow("Trackobot",frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+    testing["Object" + str(iter)]["In"] = Medicinetracker.ins
+    testing["Object" + str(iter)]["Out"] = Medicinetracker.outs
     Medicinetracker.capture.release()
     # result.release()
     
     # Closes all the frames
     cv2.destroyAllWindows()
-   
+    data_out = json.dumps(testing["Object0"])
+    client.publish("Object",data_out)
+    print("Just published "+ str(data_out)+" to Topic Object")
     print("The video was successfully saved")

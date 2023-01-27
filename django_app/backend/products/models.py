@@ -17,6 +17,8 @@ class Product(models.Model):
     barcode = models.CharField(max_length=48,null=True)
     quantity = models.IntegerField(null=True)
     type = models.CharField(choices=TYPES,max_length=30,null=True)
+    In = models.BooleanField(default=False)
+    Out = models.BooleanField(default=True)
     created_on = models.DateTimeField(auto_now_add=True,null=True)
     
     workspace_uuid = models.ForeignKey(Workspace,on_delete=models.CASCADE,null=True)
