@@ -88,7 +88,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'trackobotDB',
         'USER': 'postgres',
-        'PASSWORD': 'password',
+        'PASSWORD': 'admin1234',
         'HOST': '127.0.0.1', 
         'PORT': '5432', 
 
