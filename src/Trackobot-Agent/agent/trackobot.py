@@ -12,9 +12,9 @@ from utilities import Constants
 
 class Trackobot:
     
-    def __init__(self, app_conf, user_conf, constants = Constants(), unique_colors = 400):
+    def __init__(self, user_conf, constants = Constants(), unique_colors = 400):
         
-        self.app_conf = app_conf
+        self.app_conf = constants.app_conf
         self.user_conf = user_conf
         
         self.trackerType = "CSRT"
@@ -114,77 +114,13 @@ class Trackobot:
         
         return success, self.tracked_objects
 
-    def drawBBoxes(self,bboxes):
-        iter = 0
-        for newbox in bboxes:
-            p1 = (int(newbox[0]), int(newbox[1]))
-            p2 = (int(newbox[0] + newbox[2]), int(newbox[1] + newbox[3]))
+    # def drawBBoxes(self,bboxes):
+    #     iter = 0
+    #     for newbox in bboxes:
+    #         p1 = (int(newbox[0]), int(newbox[1]))
+    #         p2 = (int(newbox[0] + newbox[2]), int(newbox[1] + newbox[3]))
             
-            cv2.rectangle(frame, p1, p2, self._colors[iter], 2, 1)
-            iter+=1    
-        print(iter)
+    #         cv2.rectangle(frame, p1, p2, self._colors[iter], 2, 1)
+    #         iter+=1    
+    #     print(iter)
 
-if __name__ == "__main__" :
-    
-    constants = Constants()
-    
-    user_conf = {
-        "source":'http://192.168.1.2:4747/video',
-        "seperating_line" : {
-            "start_point" : (250,0),
-            "end_point" : (250,500),
-            "color" : (0,0,0),
-            "thickness" : 1
-        }
-    }
-    
-    # user_conf = json.loads(sys.argv[1])
-    # user_conf["seperating_line"]["start_point"] = tuple(user_conf["seperating_line"]["start_point"])
-    # user_conf["seperating_line"]["end_point"] = tuple(user_conf["seperating_line"]["end_point"])
-    # user_conf["seperating_line"]["color"] = tuple(user_conf["seperating_line"]["color"])
-    
-    app_conf = constants.app_conf
-    tracko = Trackobot(app_conf=app_conf, user_conf=user_conf)
-    
-    barcode_flag = False
-    track_flag = False
-    res = 0
-    succ = True
-    
-    ins = 0
-    outs = 0
-    
-    while True:
-        frame = tracko.getFrame()
-        
-        success, detected_barcodes = tracko.barcodeDetector(frame)
-        
-        if success :
-            
-            res = tracko.tracker_init(frame, detected_barcodes)
-            
-        if res == 1 and success :
-            success_feedback = tracko.tracker_feedback(frame, detected_barcodes)
-            succ, tracked_objects = tracko.trackBarcodes(frame)  
-            for tobject in tracked_objects:
-                if tobject.state == "OUT":
-                    outs +=1
-            
-            ins = len(tracko.tracked_objects) - outs
-               
-        cv2.putText(frame, "IN" + str(ins) , (tracko.user_conf["seperating_line"]["start_point"][0] - 100,tracko.user_conf["seperating_line"]["start_point"][1] + 40), cv2.FONT_HERSHEY_SIMPLEX, 0.75,(0,0,255),2)
-        cv2.putText(frame, "OUT" + str(outs) , (tracko.user_conf["seperating_line"]["start_point"][0] + 100,tracko.user_conf["seperating_line"]["start_point"][1] + 40), cv2.FONT_HERSHEY_SIMPLEX, 0.75,(0,0,255),2)
-        cv2.imshow("Trackobot",frame)
-        
-        if res == 1 and success :
-            ins,outs = 0,0
-            
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-    
-    tracko.adjust_names()
-    print(tracko.inventory)
-    
-            
-        
-        
