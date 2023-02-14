@@ -7,8 +7,8 @@ import seaborn as sns
 
 from pyzbar.pyzbar import decode
 from random import randint
-from utilities import TObject,createTrackerByName
-from utilities import Constants
+from .utilities import TObject,createTrackerByName
+from .utilities import Constants
 
 class Trackobot:
     
@@ -30,25 +30,34 @@ class Trackobot:
         
         self._colors = []
         self.constants = constants
+        self.iterator = 0
     
     @property
     def inventory(self):
-        response = ""
+        
+        response = {}
         for tracked_object in self.tracked_objects:
-            response = response + str(tracked_object) + "\n"
+            self.iterator +=1
+            response[tracked_object.id] = tracked_object.JsonConverter()
         return response    
     
     def adjust_names(self):
         
         for tracked_object in self.tracked_objects:
-            tracked_object.name = (self.constants.barcode_names)[tracked_object.barcode]
+            
+            try:
+                tracked_object.name = (self.constants.barcode_names)[tracked_object.barcode]
+            except:
+                # (self.constants.barcode_names)[tracked_object.barcode] = "Unknown " + str(self.iter) 
+                continue
+                
     
     def getFrame(self):
         _ , frame = self.capture.read()
-        cv2.line(frame, self.user_conf["seperating_line"]["start_point"] , 
-                 self.user_conf["seperating_line"]["end_point"], 
-                 self.user_conf["seperating_line"]["color"], 
-                 self.user_conf["seperating_line"]["thickness"])
+        cv2.line(frame, tuple(self.user_conf["seperating_line"]["start_point"]) , 
+                 tuple(self.user_conf["seperating_line"]["end_point"]), 
+                 tuple(self.user_conf["seperating_line"]["color"]), 
+                 int(self.user_conf["seperating_line"]["thickness"]))
         return frame
 
     def barcodeDetector(self,image,feedback=False):

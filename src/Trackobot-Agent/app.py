@@ -1,6 +1,20 @@
 import cv2
-
+import paho.mqtt.client as mqtt
+import time
+import json
+import yaml
 from agent import Trackobot
+import datetime
+
+
+const_message = {}
+def on_message(cient,userdata,message):
+    global const_message
+    m_decode = message.payload.decode("utf-8","ignore")
+    m_in = yaml.safe_load(m_decode)
+    const_message = m_in
+    print(const_message)
+    
 
 def mqtt_start():
     # A function to start the mqtt subscriber
@@ -35,33 +49,82 @@ def mqtt_getUserConf():
     #     }
     # }
     
-    user_configuration = {}
-    return user_configuration
+    
+    user_configuration={}
+    while not user_configuration:
+        try:
+            
+            client.loop_start()
+            client.subscribe("Config")
+            client.on_message = on_message
+            if const_message:
+                user_configuration = const_message
+                print(user_configuration)
+                
+                client.loop_stop()
+                return user_configuration
+            
+        except:   
+            user_configuration = {
+                "source":'http://192.168.1.3:4747/video',
+                "seperating_line" : {
+                    "start_point" : (250,0),
+                    "end_point" : (250,500),
+                    "color" : (255,255,0),
+                    "thickness" : 1
+                }
+            }
+            return user_configuration
+
+def get_keys(input_dict):
+    for key, value in input_dict.items():
+        if isinstance(value, dict):
+            for subkey in get_keys(value):
+                yield key + '/' + subkey
+        else:
+            yield key
+
+
 
 def mqtt_sendInventory(inventory):
     # Add here the needed code so as to send inventory dictionary to mqtt
     return 
 
 if __name__ == "__main__" :
-    
+    mqttBroker = "192.168.1.5"
+    client = mqtt.Client("Raspberry")
+    client.connect(mqttBroker)
+
     barcode_flag = False
     track_flag = False
     succ = True
-    switch = False
+    switch = True
     
     res = 0
     ins = 0
     outs = 0
     
-    switch = mqtt_trigger()
+
+    # switch = mqtt_trigger()
     
+   
     user_conf = mqtt_getUserConf()
-    
+    print(user_conf)
+    print(type(user_conf))
+    # user_conf = {
+    #     "source":'http://192.168.1.4:4747/video',
+    #     "seperating_line" : {
+    #         "start_point" : (250,0),
+    #         "end_point" : (250,500),
+    #         "color" : (0,0,0),
+    #         "thickness" : 1
+    #     }
+    # }
     tracko = Trackobot(user_conf=user_conf)
-    
+    endtime = datetime.datetime.now()+datetime.timedelta(seconds=15)
     while switch:
-        switch = mqtt_trigger()
-        
+        # switch = mqtt_trigger()
+       
         frame = tracko.getFrame()
         
         success, detected_barcodes = tracko.barcodeDetector(frame)
@@ -88,12 +151,23 @@ if __name__ == "__main__" :
             
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-    
+        
         tracko.adjust_names()
-        
-        mqtt_sendInventory(tracko.inventory)
-        
-    print(tracko.inventory)
+        if (tracko.inventory and datetime.datetime.now()>=endtime):
+            data_out = yaml.dump(tracko.inventory, default_flow_style=False)
+            client.publish("Inventory",data_out)
+            print("Just published "+ str(data_out)+" to Topic Inventory")
+            endtime = datetime.datetime.now()+datetime.timedelta(seconds=15)
+        # mqtt_sendInventory(tracko.inventory)
+    
+    # tracko.adjust_names()
+    
+    # print(tracko.inventory)
+
+    # #
+    # data_out = string
+    # client.publish("Config",data_out)
+    # print("Just published "+ str(data_out)+" to Topic Config")
     
             
         

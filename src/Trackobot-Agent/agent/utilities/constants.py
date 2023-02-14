@@ -12,7 +12,8 @@ class Constants(object):
         
         self._BARCODE_NAMES = {
             "5200309851012" : "Bepanthol",
-            "4005800171468" : "Hansaplast"
+            "4005800171468" : "Hansaplast",
+            "7622210982537" : "Dentyne"
         }
         
     @property
