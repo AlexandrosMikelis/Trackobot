@@ -90,8 +90,18 @@ def mqtt_sendInventory(inventory):
     # Add here the needed code so as to send inventory dictionary to mqtt
     return 
 
+def wlan_ip():
+    import subprocess
+    result=subprocess.run('ipconfig',stdout=subprocess.PIPE,text=True).stdout.lower()
+    scan=0
+    for i in result.split('\n'):
+        if 'wireless' in i: scan=1
+        if scan:
+            if 'ipv4' in i: return i.split(':')[1].strip()
+
+
 if __name__ == "__main__" :
-    mqttBroker = "192.168.1.5"
+    mqttBroker = wlan_ip()
     client = mqtt.Client("Raspberry")
     client.connect(mqttBroker)
 

@@ -25,6 +25,7 @@ class Trackobot:
         self.iter = 0
         
         self.capture = cv2.VideoCapture(self.user_conf["source"])
+        self.capture.set(cv2.CAP_PROP_FPS, 15)
         self.capture.set(3,self.app_conf["constants"]["video_width"])
         self.capture.set(4,self.app_conf["constants"]["video_height"])
         
